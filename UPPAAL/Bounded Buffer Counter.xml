@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+int count = 0;</declaration>
+	<template>
+		<name x="5" y="5">Producer</name>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id0" x="0" y="0">
+			<name x="-10" y="-34">Producer</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id1">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="18" y="-5">count &lt; 3</label>
+			<label kind="assignment" x="0" y="68">count++</label>
+			<nail x="68" y="59"/>
+			<nail x="-25" y="68"/>
+		</transition>
+	</template>
+	<template>
+		<name>Consumer</name>
+		<location id="id2" x="0" y="0">
+			<name x="-10" y="-34">Consumer</name>
+		</location>
+		<init ref="id2"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id2"/>
+			<label kind="guard" x="18" y="-17">count &gt; 0</label>
+			<label kind="assignment" x="18" y="17">count--</label>
+			<nail x="76" y="34"/>
+			<nail x="-25" y="76"/>
+		</transition>
+	</template>
+	<system>producer = Producer();
+consumer = Consumer();
+
+system producer, consumer;</system>
+	<queries>
+		<option key="--extrapolation" value="1"/>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>A[] count &gt;= 0</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-22 23:32:00 +0200">
+			</result>
+		</query>
+	</queries>
+</nta>

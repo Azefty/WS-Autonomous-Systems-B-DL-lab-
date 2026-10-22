@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>const int N = 2;
+const int QSIZE = 4;
+
+typedef int[0,N-1] task_t;
+typedef int[0,QSIZE] qindex_t;
+
+chan request[N];
+chan release[N];
+
+task_t queue[QSIZE];
+
+qindex_t head = 0;
+qindex_t tail = 0;
+qindex_t count = 0;
+
+task_t selected = 0;
+
+void enqueue(task_t id) {
+    queue[tail] = id;
+    tail = (tail + 1) % QSIZE;
+    count++;
+}
+
+task_t dequeue() {
+    task_t id;
+    id = queue[head];
+    head = (head + 1) % QSIZE;
+    count--;
+    return id;
+}</declaration>
+	<template>
+		<name x="5" y="5">Worker</name>
+		<parameter>const task_t id</parameter>
+		<declaration>// Place local declarations here.
+
+clock x;</declaration>
+		<location id="id0" x="-331" y="-119">
+			<name x="-341" y="-153">Idle</name>
+		</location>
+		<location id="id1" x="-153" y="-119">
+			<name x="-163" y="-153">Waiting</name>
+		</location>
+		<location id="id2" x="8" y="-110">
+			<name x="-2" y="-144">Working</name>
+			<label kind="invariant" x="-2" y="-93">x &lt;= 5</label>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-93" y="-76">x &gt;= 2</label>
+			<nail x="-127" y="0"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-127" y="-136">release[id]?</label>
+			<label kind="assignment" x="-135" y="-114">x = 0</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-306" y="-144">request[id]!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Controller</name>
+		<location id="id6" x="-187" y="-42">
+			<name x="-197" y="-76">Ready</name>
+		</location>
+		<location id="id7" x="238" y="17">
+			<name x="228" y="-17">Select</name>
+			<committed/>
+		</location>
+		<init ref="id6"/>
+		<transition id="id8">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="69" y="-55">release[selected]!</label>
+			<nail x="51" y="-93"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-68" y="-17">count &gt; 0</label>
+			<label kind="assignment" x="-94" y="54">selected = dequeue()</label>
+		</transition>
+		<transition id="id10">
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-263" y="-42">count &lt; QSIZE</label>
+			<label kind="synchronisation" x="-255" y="-17">request[1]?</label>
+			<label kind="assignment" x="-238" y="17">enqueue(1)</label>
+			<nail x="-263" y="8"/>
+			<nail x="-161" y="17"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-220" y="-123">count &lt; QSIZE</label>
+			<label kind="synchronisation" x="-220" y="-106">request[0]?</label>
+			<label kind="assignment" x="-220" y="-89">enqueue(0)</label>
+			<nail x="-238" y="-76"/>
+			<nail x="-144" y="-102"/>
+		</transition>
+	</template>
+	<system>Worker0 = Worker(0);
+Worker1 = Worker(1);
+controller = Controller();
+
+system Worker0, Worker1, controller;</system>
+	<queries>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>Worker1.Waiting --&gt; Worker1.Working</formula>
+			<comment/>
+			<result outcome="failure" type="quality" timestamp="2026-10-23 00:17:52 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>Worker0.Waiting --&gt; Worker0.Working</formula>
+			<comment/>
+			<result outcome="failure" type="quality" timestamp="2026-10-23 00:17:53 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Worker1.Working</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-23 00:17:55 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Worker0.Working</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-23 00:17:56 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] count &gt;= 0</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-23 00:17:58 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-23 00:16:57 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] count &lt;= QSIZE</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-23 00:16:42 +0200">
+			</result>
+		</query>
+	</queries>
+</nta>
